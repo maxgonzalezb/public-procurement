@@ -10,6 +10,83 @@ source('C:\\repos\\mop-auctions\\R\\Functions.R')
 bids <- read.csv("C:/repos/public-procurement/data/bids.csv", encoding="CP1252")
 table(bids$Oferta.seleccionada)
 
+library(lubridate)
+library(MASS)
+library(fitdistrplus)
+library(parallel)
+library(foreach)
+library(doParallel)
+library(BiocManager)
+library(transport)
+library(waddR)
+library(cowplot)
+library(rbenchmark)
+library(RColorBrewer)
+
+source('C:\\repos\\mop-auctions\\R\\Functions.R')
+
+df=bids%>%mutate(FechaInicio=as.Date(FechaInicio))
+
+start=2
+split1=2
+split2=2
+
+#Create different datasets
+cutoff0=ymd(min(df$FechaInicio)) + years(start)
+cutoff1=ymd(min(df$FechaInicio)) + years(split1+start)
+cutoff2=cutoff1 + years(split2)
+df.period1=df%>%filter(FechaInicio<=cutoff1&FechaInicio>=cutoff0)
+df.period2=df%>%filter(FechaInicio>cutoff1&FechaInicio<=cutoff2)
+length(unique(df.period1$Codigo))
+length(unique(df.period2$Codigo))
+
+#Create degree distributions for period 1.
+#todo: arreglar esta parte
+degree.bottom.1=df.period1%>%group_by(RutProveedor)%>%summarise(d=length(unique(NombreOrganismo)))%>%arrange(-d)
+degree.bottom.1=degree.bottom.1%>%mutate(v.bottom=seq_len(nrow(degree.bottom.1)))
+degree.bottom.2=df.period2%>%group_by(RutProveedor)%>%summarise(d=length(unique(NombreOrganismo)))%>%arrange(-d)
+degree.bottom.2=degree.bottom.2%>%mutate(v.bottom=seq_len(nrow(degree.bottom.2)))
+
+degree.top.1=df.period1%>%group_by(NombreOrganismo)%>%summarise(d=length(unique(RutProveedor)))%>%arrange(-d)
+degree.top.1=degree.top.1%>%mutate(v.top=seq_len(nrow(degree.top.1)))
+degree.top.2=df.period2%>%group_by(NombreOrganismo)%>%summarise(d=length(unique(RutProveedor)))%>%arrange(-d)
+degree.top.2=degree.top.2%>%mutate(v.top=seq_len(nrow(degree.top.2)))
+
+n.top.2=nrow(degree.top.2)
+n.bottom.2=nrow(degree.bottom.2)
+nbottom=nrow(degree.bottom.2)
+
+n.top.1=nrow(degree.top.1)
+n.bottom.1=nrow(degree.bottom.1)
+nbottom.1=nrow(degree.bottom.1)
+
+
+
+
+ggplot(degree.bottom.1,aes(x=d))+geom_histogram(binwidth = 3)+scale_y_log10()
+ggplot(degree.top.1,aes(x=d))+geom_histogram(binwidth = 10)
+
+#TrueEdgelist
+lookup_names.top.1=degree.top.1%>%mutate(v.top=seq_len(nrow(degree.top.1)))%>%dplyr::select(NombreOrganismo,v.top)
+lookup_names.bottom.1=degree.bottom.1%>%mutate(v.bottom=seq_len(nrow(degree.bottom.1)))%>%dplyr::select(RutProveedor,v.bottom)
+lookup_names.top.2=degree.top.2%>%mutate(v.top=seq_len(nrow(degree.top.2)))%>%dplyr::select(NombreOrganismo,v.top)
+lookup_names.bottom.2=degree.bottom.2%>%mutate(v.bottom=seq_len(nrow(degree.bottom.2)))%>%dplyr::select(RutProveedor,v.bottom)
+edgelist.period1=df.period1%>%dplyr::select(RutProveedor,NombreOrganismo)%>%left_join(lookup_names.top)%>%left_join(lookup_names.bottom)%>%dplyr::select(v.top,v.bottom)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Auxiliary
 names=bids%>%group_by(RutUnidad,NombreOrganismo)%>%summarise()%>%slice(1)
 

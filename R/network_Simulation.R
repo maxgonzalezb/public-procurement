@@ -1,4 +1,3 @@
-
 ## Generate and simulate
 #todo:bring coherently
 alpha.top.nbin=(fitdist(degree.top.1$d,"nbinom",method = 'mle',discrete = T))$estimate
@@ -16,9 +15,15 @@ n.top.1=nrow(degree.top.1)
 n.bottom.1=nrow(degree.bottom.1)
 nbottom.1=nrow(degree.bottom.1)
 
+res.simulations=SimNetworkNodeDistribution(alpha.top.nbin,alpha.bottom.1,ntop = n.top.2,nbottom = n.bottom.2,m_ln=m_ln)
+simulated.2=SimEdgeCreation(res.simulations=res.simulations)
+
+
+##OLD
+
+
 lambda.df=fitAuctionBidders(degree.top =degree.top.1 ,bids =df.period1 )
 params.df=fitdDegreesBids(degree.bottom = degree.bottom.1,bids =df.period1 )
-
 
 simulated.top=NULL
 simulated.bottom=NULL

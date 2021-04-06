@@ -1,9 +1,3 @@
-library(igraph)
-lookup_names.top
-degree.top=degree.top.1
-degree.bottom=degree.bottom.1
-degree.bottom
-degree.top.single=4
 
 createBid<-function(nParticipants,degreeBidder,lm.mu,lm.sd){
 newdata=data.frame(nParticipants=nParticipants,d=degreeBidder)
@@ -17,6 +11,7 @@ createAuction<-function(degree.top.single,degree.bottom,lambda.df,params.df,lm.m
 nParticipants=0
 while (nParticipants==0) {
 index=which(degree.top.single==lambda.df$d)
+print(degree.top.single)
 draw=rlnorm(n = 1,meanlog =  lambda.df$meanLog[index],sdlog =lambda.df$sdLog[index] )%>%round()
 nParticipants=min(nrow(degree.bottom),draw) 
 if(degree.top.single==1){nParticipants=1}
@@ -467,7 +462,6 @@ return(simulated.2)
 }  
 
 compareCounterfactuals<-function(scenario,simulated.bids.Model1,simulated.bids.Model2,cf.edgelist.Model1,cf.edgelist.Model2){
-  #Create Tables from empírical
   baseline.model1.stats1=simulated.bids.Model1%>%summarise(mean.bid=mean(bid),sd.bid=sd(bid))
   baseline.model1.stats2=simulated.bids.Model1%>%group_by(ID)%>%summarise(participants=length(ID))%>%summarise(mean.participants=mean(participants),sd.participants=sd(participants))
   baseline.model1.stats=data.frame(baseline.model1.stats1,baseline.model1.stats2)%>%mutate(Simulation='Baseline',Type='Model 1')%>%pivot_longer(cols = mean.bid:sd.participants)
@@ -539,5 +533,47 @@ increaseDensityNetwork<-function(extraProp = 0.1,edgelist.original,mode){
 }
 
 
+fitdDegreesBids<-function(degree.bottom,bids){
+  bids.min=bids%>%dplyr::select(Codigo,RutProveedor,MCA_MPO)%>%left_join(degree.bottom)
+  params.df=data.frame()
+  max_deg=max(degree.bottom$d)
+  degrees.bottom=seq_len(max_deg)
+  #bids.participants=bids.min%>%group_by(d,Codigo)%>%summarise(participants=length(Codigo))
+  
+  for (d.bottom in degrees.bottom){
+    bids.iter=bids.min%>%filter(d==d.bottom)
+    
+    if(nrow(bids.iter)==0){
+      prev=d.bottom-1
+      params.iter=params.df%>%filter(d==(d.bottom-1))%>%mutate(d=d.bottom)
+    }
+    
+    if(nrow(bids.iter>0)){
+      bids.iter=bids.min%>%group_by(Codigo)%>%mutate(nparticipants=length(Codigo))
+      
+      
+      for (par in seq_len(20)) {
+        bids.iter.part=bids.iter%>%filter(nparticipants==par)
+        fitnormal=(fitdist(bids.iter.part$MCA_MPO,"norm",method = 'mle',discrete = F))
+        mu=fitnormal$estimate[1]%>%as.numeric()
+        sd=fitnormal$estimate[2]%>%as.numeric()
+        params.iter=data.frame(d=d.bottom,mu=mu,sd=sd,nParticipants=par)
+        params.df=rbind(params.iter,params.df)
+        
+      }
+      
+      
+      #fitnormal=(fitdist(bids.iter$MCA_MPO,"norm",method = 'mle',discrete = F))
+      #fitbin=(fitdist(bids.degree$participants,"nbinom",method = 'mle',discrete = T))
+      #fitln=(fitdist(bids.degree$participants,"lnorm",method = 'mle',discrete = T))  
+      #mu=fitnormal$estimate[1]%>%as.numeric()
+      #sd=fitnormal$estimate[2]%>%as.numeric()
+      #params.iter=data.frame(d=d.bottom,mu=mu,sd=sd)
+    }
+    
+    
+  }
+  return(params.df)   
+}
 
 
