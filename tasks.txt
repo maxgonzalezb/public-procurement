@@ -1,0 +1,11 @@
+1.
+-Create a -md file with the description of the project
+-Objective
+-Link to slides
+-Literature
+-Some images that could be interesting. 
+
+2. Continue reorganizing
+-Create proper exploration files
+-Move diagnostics to diagnostics
+-

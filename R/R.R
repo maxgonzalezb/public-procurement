@@ -23,7 +23,7 @@ library(cowplot)
 library(rbenchmark)
 library(RColorBrewer)
 
-source('C:\\repos\\mop-auctions\\R\\Functions.R')
+source('C:\\repos\\public-procurement\\R\\Functions.R')
 
 df=bids%>%mutate(FechaInicio=as.Date(FechaInicio))
 
