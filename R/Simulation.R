@@ -34,7 +34,7 @@ diag_compare=compareModelsDiag(simulated.bids.Model1 = simulated.bids.Model1,sim
                                degree.bottom.sim=degree.bottom.sim,Model1Name = 'Exogenous',Model2Name = 'Endogenous')
 diag_compare_plot=diag_compare[[1]]
 diag_compare_table=diag_compare[[2]]
-
 diag_compare_plot
+
 create_kable(diag_compare_table,caption = 'Model Comparison Statistics')
   

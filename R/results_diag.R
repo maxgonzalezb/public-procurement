@@ -7,8 +7,6 @@ bids.sim.diag.iter=createBidSim(simulated.2 = simulated.2,errorGov =0.15, sdpara
 bids.sim.diag=rbind(bids.sim.diag.iter,bids.sim.diag)
 }
 
-
-
 createBidSim<-function(simulated.2,sdparam,errorGov){
   
   vert.top.sim2=simulated.2%>%group_by(v.top)%>%count()

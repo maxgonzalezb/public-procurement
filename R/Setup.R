@@ -6,9 +6,6 @@ library(kableExtra)
 library(tidyr)
 library(poweRlaw)
 library(dplyr)
-source('C:\\repos\\mop-auctions\\R\\Functions.R')
-bids <- read.csv("C:/repos/public-procurement/data/bids.csv", encoding="CP1252")
-table(bids$Oferta.seleccionada)
 
 library(lubridate)
 library(MASS)
@@ -23,7 +20,9 @@ library(cowplot)
 library(rbenchmark)
 library(RColorBrewer)
 
+source('C:\\repos\\mop-auctions\\R\\Functions.R')
 source('C:\\repos\\public-procurement\\R\\Functions.R')
+bids <- read.csv("C:/repos/public-procurement/data/bids.csv", encoding="CP1252")
 
 df=bids%>%mutate(FechaInicio=as.Date(FechaInicio))
 
